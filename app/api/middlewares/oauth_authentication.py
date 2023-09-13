@@ -2,6 +2,7 @@ import json
 import os
 import requests
 import jwt
+import time
 
 
 from dotenv import load_dotenv
@@ -56,18 +57,26 @@ async def validate_access_token(token: dict = Depends(oauth2_scheme)):
         print("pub key", public_keys)
 
         for key in public_keys:
-
-            print("key===", key)
-
-
             decoded_token = jwt.decode(token.credentials, key, algorithms=["RS256"], audience=KEYCLOAK_CLIENT_ID)
         print("decoded token", decoded_token)
 
+        issuer = decoded_token.get("iss")
+
+        if issuer != os.environ.get("OAUTH_ISSUER"):
+            raise HTTPException(status_code=401, detail="Invalid token issuer")
+
+        # Check expiration
+        current_time = time.time()
+        expiration_time = decoded_token.get("exp")
+        if expiration_time is not None and current_time > expiration_time:
+            raise HTTPException(status_code=401, detail="Token has expired")
+
         return decoded_token
 
-        # if not valid_token:
-        #     raise HTTPException(status_code=401, detail="Invalid access token")
-
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Token has expired")
+    except jwt.JWTError:
+        raise HTTPException(status_code=401, detail="Invalid Access token")
     except Exception as e:
         print("error decoding token", e)
-        raise HTTPException(status_code=401, detail="Invalid Access Token")
+        raise HTTPException(status_code=401, detail="Token Error")
