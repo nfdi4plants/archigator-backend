@@ -1,0 +1,30 @@
+version: "3.9"
+services:
+  archigator-frontend:
+    image: git.bwcloud.uni-freiburg.de:5050/marcel/archigator-gui:latest
+    ports:
+      - 80:80
+    container_name: archigator-frontend
+    networks:
+      - archigator-network
+
+  archigator-backend:
+    image: git.bwcloud.uni-freiburg.de:5050/marcel/archigator:latest
+    ports:
+      - 8000:8000
+    container_name: archigator-backend
+    networks:
+      - archigator-network
+
+#  nginx:
+#    image: your-dockerhub-username/nginx-container
+#    ports:
+#      - 80:80
+#    networks:
+#      - archigator-network
+#    depends_on:
+#      - archigator-frontend
+#      - archigator-backend
+
+networks:
+  archigator-network:

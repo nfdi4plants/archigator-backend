@@ -1,0 +1,128 @@
+# pipeline replaces: /opt/gitlab/embedded/service/gitlab-rails/lib/gitlab/ci/templates/Auto-DevOps.gitlab-ci.yml
+variables:
+  GIT_LFS_SKIP_SMUDGE: "1"
+
+stages:    # List of stages for jobs, and their order of execution
+  - arc_json
+  - validation
+  - metadata
+
+create ARC JSON:
+  stage: arc_json
+  image: 
+    name: ghcr.io/nfdi4plants/arc-export:main
+    entrypoint: [""]
+  variables:
+    ARC_PATH: .
+  script:
+    - /arc-export -p .
+    - ls -la
+    - 'curl --header "JOB-TOKEN: $CI_JOB_TOKEN" --upload-file arc.json "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/isa_arc_json/0.0.1/arc.json"'
+  artifacts:
+    when: always
+    paths:
+      - arc.json
+
+validate ARC:   # Validate ARC and run Unit tests
+  stage: validation    # It only starts when the job in the build stage completes successfully.
+  image: ghcr.io/nfdi4plants/arc-validate:main
+  variables:
+    ARC_PATH: .
+  script:
+    - echo "Running unit tests... "
+    - set +e
+    - bash /opt/arc-validate/arc-validate.sh; ret=$?
+    - echo "$ret"
+    - set -e
+    - /opt/arc-validate/create-badge.py
+    - exit "$ret"
+  artifacts:
+    when: always
+    paths:
+      - arc-validate-results.xml
+      - arc-quality.svg
+    reports:
+      junit:
+        - arc-validate-results.xml
+    expire_in: 1 hour
+
+create metadata:   # This job also runs in the test stage and creates some metadata
+  stage: metadata    # It can run at the same time as unit-test-job (in parallel).
+  dependencies:
+    - validate ARC
+  needs:
+    - validate ARC
+  image: ghcr.io/nfdi4plants/arc-to-invenio:main
+  script:
+    - arc-to-invenio -p .
+    - ls -lah
+    - cat metadata.json
+  artifacts:
+    paths:
+      - metadata.json
+    #expire_in: 1 hour
+
+#create_badge: # job that creates the coverage test badge
+#  stage: badge
+#  image: ghcr.io/nfdi4plants/arc-validate:main
+##  dependencies:
+##    - validate ARC
+##  needs:
+##    - validate ARC
+#  script:
+#    - echo "Creating Badge... "
+#    - bash /opt/arc-validate/arc-validate.sh
+#    - ls -lah
+#    - date +%s > date.ts
+#    - create-badge.py
+#    - ls -lah
+#    - 'curl --header "JOB-TOKEN: $CI_JOB_TOKEN" --upload-file date.ts "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packageyys/generic/isa_arc_json/0.0.1/date.ts"'
+#  artifacts:
+#    when: always
+#    paths:
+#      - arc-validate-results.xml
+#      - arc-quality.svg
+#      - date.ts
+#    expire_in: never
+
+#create archive: # job that creates a zip archive of the arc structure
+#  stage: archive
+#  image: debian:latest
+#  dependencies:
+#    - validate ARC
+#    - create metadata
+#  needs: [validate ARC, create metadata]
+#  before_script:
+#    - apt-get update -qq && apt-get install -y -qq zip
+#  script:
+#    - ls -lah
+#    - echo "creating zip archive."
+#    - zip -r ${CI_PROJECT_NAME}.zip . -x ".git/*" -x ".arc/*" -x arc-validate-results.xml -x metadata.json -x .gitattributes
+#    - ls -lah
+#    - echo "Archive built."
+#  artifacts:
+#    paths:
+#      - ${CI_PROJECT_NAME}.zip
+#      - metadata.json
+#    expire_in: 1 hour
+
+#upload to invenio:      # Job that uploads zip archive to Invenio
+#  stage: upload  # It only runs when *both* jobs in the test stage complete successfully.
+#  image: git.bwcloud.uni-freiburg.de:5050/marcel/archigator
+#  dependencies:
+#    - create archive
+#  needs:
+#    - create archive
+#  environment:
+#    name: publish_invenio
+#    url: https://invenio.nfdi4plants.org
+#  rules:
+#    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+#      when: manual
+#  script:
+#    - ls -lah
+#    - ls -lah /
+#    - echo "Deploying application..."
+#    - python3 /push/pusher.py || true
+#    - echo "Application successfully deployed."
+#  when: manual
