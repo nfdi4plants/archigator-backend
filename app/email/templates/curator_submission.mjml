@@ -38,14 +38,15 @@
 
         <mj-section full-width="full-width" background-color="#1F2B38" padding-bottom="0">
             <mj-column width="100%">
-                <mj-image src="https://archigator.nfdi4plants.org/images/banner-top.png" width="600px" alt="banner_top"
+                <mj-image src="https://archigator.nfdi4plants.org/images/banner_top_blank.png" width="600px" alt="banner_top"
                           padding="0"/>
             </mj-column>
         </mj-section>
 
+
         <mj-section background-color="#2D3E50">
             <mj-column width="100%">
-                <mj-image src="https://archigator.nfdi4plants.org/images/banner-bottom.png" width="600px" alt="banner_bottom"
+                <mj-image src="https://archigator.nfdi4plants.org/images/banner-bottom_Dataplant.png" width="600px" alt="banner_bottom"
                           padding="0"/>
             </mj-column>
         </mj-section>
