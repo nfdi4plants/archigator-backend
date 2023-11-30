@@ -60,6 +60,8 @@ def remove_email_identifiers(metadata: Metadata) -> Metadata:
     return metadata
 
 
+
+
 @router.post("", summary="Publish", status_code=status.HTTP_201_CREATED, response_class=Response,
              dependencies=[Depends(validate_access_token)], responses={200: {"model": Publication}})
 async def publish_project(request: Request, background_tasks: BackgroundTasks,
@@ -252,8 +254,9 @@ async def publish_project(request: Request, background_tasks: BackgroundTasks,
 
     print("user email is", user.email)
 
-    submission_url = "https://archive.nfdi4plants.org/communities/dataplant/requests/"
-    submission_url = submission_url + review.id
+    # TODO: check if it is possible to retrive this url from invenio or something else...
+    submission_url = "https://archive.nfdi4plants.org/communities/dataplant/requests"
+    submission_url = hmac_generator.build_url(submission_url, review.id)
     curator_mail = os.environ.get("CURATOR_MAIL", None)
     curator_mail = list(set(curator_mail))
 
