@@ -5,8 +5,6 @@ from app.email.Mailer import Mailer
 
 
 def send_testmail(receiver: str):
-    print("in task mail \n\n\n\n")
-
     smtp_server = os.getenv("EMAIL_SERVER")
     username = os.getenv("EMAIL_USERNAME")
     sender = os.getenv("EMAIL_SENDER")

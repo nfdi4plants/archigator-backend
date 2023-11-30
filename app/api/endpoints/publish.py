@@ -118,8 +118,6 @@ async def publish_project(request: Request, background_tasks: BackgroundTasks,
     except:
         raise HTTPException(status_code=403, detail="No metadata available.")
 
-    print("metadata", metadata)
-
     metadata_model = Metadata(**metadata)
 
     identifier_url = f"https://git.nfdi4plants.org/projects/{project.id}"
@@ -133,8 +131,6 @@ async def publish_project(request: Request, background_tasks: BackgroundTasks,
     metadata_model.description = f"hosted on: https://git.nfdi4plants.org/projects/{project.id}"
 
     metadata_model = remove_email_identifiers(metadata_model)
-
-    print("metadata", metadata)
 
     invenio_api = Invenio_API()
 
