@@ -257,10 +257,9 @@ async def publish_project(request: Request, background_tasks: BackgroundTasks,
     # TODO: check if it is possible to retrive this url from invenio or something else...
     submission_url = "https://archive.nfdi4plants.org/communities/dataplant/requests"
     submission_url = hmac_generator.build_url(submission_url, review.id)
-    curator_mail = os.environ.get("CURATOR_MAIL", None)
-    curator_mail = list(set(curator_mail))
 
-    user_mails = list(set(user_mails))
+    curator_mail = [mail for mail in [os.environ.get("CURATOR_MAIL", None)] if mail is not None]
+    print("sending to:", curator_mail)
 
     if mail_enabled:
         background_tasks.add_task(send_mail, user_mails, user.name, project.name, order_url)
