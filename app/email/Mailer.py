@@ -24,11 +24,6 @@ class Mailer:
 
         self.root_message = MIMEMultipart('related')
 
-        print(self.port)
-        print(self.username)
-        print(self.receiver)
-
-
     def create_basemail(self):
         """
         Create a base email message.
