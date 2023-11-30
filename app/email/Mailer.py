@@ -114,6 +114,9 @@ class Mailer:
 
         self.create_basemail()
 
+        self.root_message['Subject'] = 'New ARC Submission is available'
+
+
         msg_alternative = MIMEMultipart('alternative')
         self.root_message.attach(msg_alternative)
 
