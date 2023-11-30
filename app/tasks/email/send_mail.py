@@ -47,6 +47,6 @@ def send_curator_mail(receiver: list, user: str, project_name: str, submission_u
     mailer = Mailer(username=username, port=port, password=password,
                     smtp_server=smtp_server, sender=sender, receiver=receiver)
 
-    mailer.create_curator_mail(user=user, project_name=project_name, order_url=submission_url)
+    mailer.create_curator_mail(user=user, project_name=project_name, submission_url=submission_url)
     print("\n\n\n sending mail \n\n\n")
     mailer.send_mail()
