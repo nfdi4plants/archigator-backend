@@ -30,6 +30,12 @@ class Mailer:
 
 
     def create_basemail(self):
+        """
+        Create a base email message.
+
+        :return: None
+        """
+
         self.root_message = MIMEMultipart('related')
         self.root_message['Subject'] = 'ARC Release'
         self.root_message["From"] = self.sender
@@ -41,6 +47,12 @@ class Mailer:
 
 
     def create_testmail(self, author):
+        """
+        Create a test email.
+
+        :param author: The author of the email.
+        :return: None
+        """
 
         test_template = Path("app/email/templates/testmail.html").read_text()
         # test_template = open("templates/testmail.html", "r").read()
@@ -67,7 +79,22 @@ class Mailer:
 
 
     def create_publishmail(self, author, project_name, order_url):
+        """
+        :param author: The author of the project being published.
+        :param project_name: The name of the project being published.
+        :param order_url: The URL of the order associated with the project.
+        :return: None
 
+        This method is used to create a publish mail. It takes the author, project_name, and order_url as parameters and
+        does the following steps:
+        1. Reads the HTML template file from the specified path.
+        2. Calls the create_basemail() method.
+        3. Creates a MIMEMultipart object for alternative message content.
+        4. Attaches the alternative plain text message to the MIMEMultipart object.
+        5. Renders the HTML template using the provided template parameters.
+        6. Creates a MIMEText object for the HTML message content.
+        7. Attaches the HTML message to the MIMEMultipart object.
+        """
         test_template = Path("app/email/templates/publishmail.html").read_text()
 
         self.create_basemail()
@@ -86,8 +113,32 @@ class Mailer:
         msg_alternative.attach(html_message)
 
 
-    def send_mail(self):
+    def create_curator_mail(self, user, project_name, submission_url):
 
+        curator_template = Path("app/email/templates/curator_submission.html").read_text()
+
+        self.create_basemail()
+
+        msg_alternative = MIMEMultipart('alternative')
+        self.root_message.attach(msg_alternative)
+
+        template_params = {"User": user, "Project_name": project_name, "submission_url": submission_url}
+
+        final_email_html = pystache.render(curator_template, template_params)
+
+        message_text = MIMEText('This is the alternative plain text message.')
+        msg_alternative.attach(message_text)
+
+        html_message = MIMEText(final_email_html, "html", _charset='UTF-8')
+        msg_alternative.attach(html_message)
+
+
+    def send_mail(self):
+        """
+        Sends an email using the given SMTP server configuration.
+
+        :return: None
+        """
         context = ssl.create_default_context()
 
         server = smtplib.SMTP(self.smtp_server, self.port)

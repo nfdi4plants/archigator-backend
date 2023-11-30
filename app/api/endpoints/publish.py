@@ -32,7 +32,7 @@ from app.invenio.models.record import Metadata, Record
 from app.api.middlewares.jwt_authentication import JWTBearer
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from app.api.models.publish.publish_response import Publication
-from app.tasks.email.send_mail import send_testmail, send_mail
+from app.tasks.email.send_mail import send_testmail, send_mail, send_curator_mail
 
 from app.api.middlewares.oauth_authentication import *
 
@@ -70,7 +70,7 @@ async def publish_project(request: Request, background_tasks: BackgroundTasks,
         scheme, token = publication.split(" ")
         if scheme.lower() != "token":
             raise HTTPException(status_code=401, detail="Invalid authentication scheme.")
-        decoded_token = jwt.decode(token, os.getenv("ARCHIGATOR_SECRET"), algorithms=["HS256"])
+        decoded_token = jwt.decode(token, os.environ.get("ARCHIGATOR_SECRET"), algorithms=["HS256"])
         jwt_token = JwtToken(**decoded_token)
     except (ValueError, jwt.exceptions.DecodeError):
         raise HTTPException(status_code=401, detail="Invalid token.")
@@ -186,7 +186,7 @@ async def publish_project(request: Request, background_tasks: BackgroundTasks,
     # sys.exit()
 
     try:
-        bla = invenio_api.submit_draft_review(record_id=record_id, user_model=user)
+        draft = invenio_api.submit_draft_review(record_id=record_id, user_model=user)
     except:
         print("could not submit draft")
         raise HTTPException(status_code=403, detail="Couldn't submit draft review.")
@@ -252,9 +252,16 @@ async def publish_project(request: Request, background_tasks: BackgroundTasks,
 
     print("user email is", user.email)
 
+    submission_url = "https://archive.nfdi4plants.org/communities/dataplant/requests/"
+    submission_url = submission_url + review.id
+    curator_mail = os.environ.get("CURATOR_MAIL", None)
+    curator_mail = list(set(curator_mail))
+
     user_mails = list(set(user_mails))
 
     if mail_enabled:
-        # background_tasks.add_task(send_mail, user.email, user.name, project.name, order_url)
         background_tasks.add_task(send_mail, user_mails, user.name, project.name, order_url)
+
+        if curator_mail:
+            background_tasks.add_task(send_curator_mail, curator_mail, user.name, project.name, submission_url)
     return JSONResponse(status_code=201, content=response_json)
