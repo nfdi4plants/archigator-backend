@@ -2,6 +2,7 @@ from fastapi import APIRouter, Body, Depends, HTTPException, status, Response, R
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
 
+from app.helpers.link_generator import LinkGenerator
 from app.tasks.setup.add_badge import setup_project
 from app.tasks.setup.setup_all_projects import setup_projects
 from app.api.models.setup.project import Project, Projects
@@ -38,3 +39,21 @@ async def install_hook(request: Request):
     response_json = jsonable_encoder(hook_response)
 
     return JSONResponse(status_code=status.HTTP_201_CREATED, content=response_json)
+
+
+@router.post("/generatelink", summary="Setup", status_code=status.HTTP_200_OK,
+             response_class=Response, dependencies=[Depends(basic_auth)],
+             description="Generates a Link for a badge button. Usage directly in Gitlab Filehook.")
+async def generate_link(request: Request, payload: Project):
+
+    # classe generate_link aufrufen
+    filehook_link_generator = LinkGenerator()
+    filehook_link = filehook_link_generator.generate_link(payload.project_id)
+
+    # return json mit link
+
+    response = {
+        "link": filehook_link
+    }
+
+    return JSONResponse(status_code=status.HTTP_200_OK, content=response)
