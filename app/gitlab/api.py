@@ -85,10 +85,60 @@ class Gitlab_API:
         except requests.exceptions.RequestException as err:
             print(err)
 
+    def get_project_members(self,project_id):
+        url = f"{self.api_url}/projects/{project_id}/members"
+
+        response = requests.get(url, headers=self.headers)
+        if response.status_code == 200:
+            members = response.json()
+            return [member['id'] for member in members]
+        return []
+
+    def get_groups_with_access_to_project(self, project_id):
+        url = f"{self.api_url}/projects/{project_id}/shared_groups"
+
+        response = requests.get(url, headers=self.headers)
+        if response.status_code == 200:
+            groups = response.json()
+            return [group['group_id'] for group in groups]
+        return []
+
+    def get_group_members(self, group_id):
+        url = f"{self.api_url}/groups/{group_id}/members"
+
+        response = requests.get(url, headers=self.headers)
+        if response.status_code == 200:
+            members = response.json()
+            return [member['id'] for member in members]
+        return []
+
+    def get_project_and_group_members(project_id):
+        project_members = self.get_project_members(project_id)
+        groups_with_access = self.get_groups_with_access_to_project(project_id)
+        group_members = []
+        for group_id in groups_with_access:
+            group_members.extend(self.get_group_members(group_id))
+        return project_members, group_members
+
+
     def userid_is_member(self, userid, project_id):
+        self.get_project_and_group_members(project_id)
+        project_members, group_members = get_project_and_group_members(project_id)
+
+        members = project_members + group_members
+
+        is_member = any(member["id"] == userid for member in members)
+
+        if is_member:
+            return True
+        else:
+            return False
+
+
+
+    def userid_is_member_old(self, userid, project_id):
         path = "/projects/"
         member_path = "/members"
-        # api_url = f'{self.api_url}{self.api_path}{path}' +'?search=marcel.tschoepe@rz.uni-freiburg.de'
         api_url = f'{self.api_url}{self.api_path}{path}{project_id}{member_path}'
 
         try:
