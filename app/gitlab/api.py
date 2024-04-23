@@ -85,11 +85,19 @@ class Gitlab_API:
             print(err)
 
     def get_project_members(self, project_id):
-        url = f"{self.api_url}{self.api_path}/projects/{project_id}/members"
+        url = f'{self.api_url}{self.api_path}/projects/{project_id}/members'
+
+        print("url is", url)
+
+
+        path = "/projects/"
+        member_path = "/members"
+
+        api_url = f'{self.api_url}{self.api_path}{path}{project_id}{member_path}'
 
         response = requests.get(url, headers=self.headers)
 
-        print("response", response, response.content)
+        print("response", response, response.content, response.json())
 
         if response.status_code == 200:
             members = response.json()
