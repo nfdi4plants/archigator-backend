@@ -55,10 +55,10 @@ async def owner(publication: str = Header(..., description="Bearer token"),
         print("no user found")
         user = None
 
-    try:
-        is_member = gitlab_api.userid_is_member(user.id, project.id)
-    except:
-        is_member = False
+    # try:
+    #     is_member = gitlab_api.userid_is_member(user.id, project.id)
+    # except:
+    #     is_member = False
 
     # try:
     #     user = gitlab_api.get_user(project.owner.id)
@@ -67,7 +67,7 @@ async def owner(publication: str = Header(..., description="Bearer token"),
     #     user = None
 
     is_member = gitlab_api.userid_is_member(user.id, project.id)
-    # print("is_member", is_member)
+    print("is_member", is_member)
 
 
     try:

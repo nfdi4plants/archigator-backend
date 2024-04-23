@@ -88,8 +88,14 @@ class Gitlab_API:
         url = f"{self.api_url}/projects/{project_id}/members"
 
         response = requests.get(url, headers=self.headers)
+
+        print("response", response, response.content)
+
         if response.status_code == 200:
             members = response.json()
+
+            print("project Mmebrtrs", members)
+
             return [member['id'] for member in members]
         return []
 
@@ -120,10 +126,12 @@ class Gitlab_API:
         return project_members, group_members
 
     def userid_is_member(self, userid, project_id):
-        self.get_project_and_group_members(project_id)
+        # self.get_project_and_group_members(project_id)
         project_members, group_members = get_project_and_group_members(project_id)
 
         members = project_members + group_members
+
+        print("memebrs", members)
 
         is_member = any(member["id"] == userid for member in members)
 
