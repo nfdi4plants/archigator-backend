@@ -118,7 +118,7 @@ class Gitlab_API:
 
         if response.status_code == 200:
             groups = response.json()
-            return [group['group_id'] for group in groups]
+            return [group['id'] for group in groups]
         return []
 
     def get_group_members(self, group_id):
