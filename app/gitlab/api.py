@@ -127,7 +127,7 @@ class Gitlab_API:
 
     def userid_is_member(self, userid, project_id):
         # self.get_project_and_group_members(project_id)
-        project_members, group_members = get_project_and_group_members(project_id)
+        project_members, group_members = self.get_project_and_group_members(project_id)
 
         members = project_members + group_members
 
