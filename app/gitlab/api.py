@@ -85,7 +85,7 @@ class Gitlab_API:
             print(err)
 
     def get_project_members(self, project_id):
-        url = f"{self.api_url}/projects/{project_id}/members"
+        url = f"{self.api_url}{self.api_path}/projects/{project_id}/members"
 
         response = requests.get(url, headers=self.headers)
 
@@ -100,7 +100,7 @@ class Gitlab_API:
         return []
 
     def get_groups_with_access_to_project(self, project_id):
-        url = f"{self.api_url}/projects/{project_id}/shared_groups"
+        url = f"{self.api_url}{self.api_path}/projects/{project_id}/shared_groups"
 
         response = requests.get(url, headers=self.headers)
         if response.status_code == 200:
@@ -109,7 +109,7 @@ class Gitlab_API:
         return []
 
     def get_group_members(self, group_id):
-        url = f"{self.api_url}/groups/{group_id}/members"
+        url = f"{self.api_url}{self.api_path}/groups/{group_id}/members"
 
         response = requests.get(url, headers=self.headers)
         if response.status_code == 200:
