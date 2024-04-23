@@ -24,7 +24,6 @@ class Gitlab_API:
         self.headers = {"Authorization": f'{"Bearer "}{self.api_token}'}
         self.api_path = "/api/v4"
 
-
     def _make_request(self, url, method="GET", data=None):
         try:
             response = requests.request(method, url, timeout=5, headers=self.headers, json=data)
@@ -85,7 +84,7 @@ class Gitlab_API:
         except requests.exceptions.RequestException as err:
             print(err)
 
-    def get_project_members(self,project_id):
+    def get_project_members(self, project_id):
         url = f"{self.api_url}/projects/{project_id}/members"
 
         response = requests.get(url, headers=self.headers)
@@ -112,14 +111,13 @@ class Gitlab_API:
             return [member['id'] for member in members]
         return []
 
-    def get_project_and_group_members(project_id):
+    def get_project_and_group_members(self, project_id):
         project_members = self.get_project_members(project_id)
         groups_with_access = self.get_groups_with_access_to_project(project_id)
         group_members = []
         for group_id in groups_with_access:
             group_members.extend(self.get_group_members(group_id))
         return project_members, group_members
-
 
     def userid_is_member(self, userid, project_id):
         self.get_project_and_group_members(project_id)
@@ -133,8 +131,6 @@ class Gitlab_API:
             return True
         else:
             return False
-
-
 
     def userid_is_member_old(self, userid, project_id):
         path = "/projects/"
@@ -410,7 +406,6 @@ class Gitlab_API:
         except requests.exceptions.RequestException as err:
             print(err)
 
-
     def remove_badge(self, project_id: int, badge_id: int):
         path = "/projects/"
         badge_path = "/badges/"
@@ -513,7 +508,6 @@ class Gitlab_API:
         except requests.exceptions.RequestException as err:
             print(err)
 
-
     def get_job_artifact_md(self, project_id: int, branch: str, filename: str, job_name: str):
         path = "/projects/"
         job_path = "/jobs/artifacts/"
@@ -529,7 +523,6 @@ class Gitlab_API:
             print("..")
             response.raise_for_status()
             # response_json = response.json()#
-
 
             # print("-->", response_json)
 
