@@ -86,15 +86,6 @@ class Gitlab_API:
 
     def get_project_members(self, project_id):
         url = f'{self.api_url}{self.api_path}/projects/{project_id}/members'
-
-        print("url is", url)
-
-
-        path = "/projects/"
-        member_path = "/members"
-
-        api_url = f'{self.api_url}{self.api_path}{path}{project_id}{member_path}'
-
         response = requests.get(url, headers=self.headers)
 
         print("response", response, response.content, response.json())
@@ -102,19 +93,13 @@ class Gitlab_API:
         if response.status_code == 200:
             members = response.json()
 
-            print("project Mmebrtrs", members)
-
             return [member['id'] for member in members]
         return []
 
     def get_groups_with_access_to_project(self, project_id):
         url = f'{self.api_url}{self.api_path}/projects/{project_id}/groups'
 
-        print("groups with access URL", url)
-
         response = requests.get(url, headers=self.headers)
-
-        print("groups has access response", response, response.content, response.json())
 
         if response.status_code == 200:
             groups = response.json()
@@ -124,11 +109,7 @@ class Gitlab_API:
     def get_group_members(self, group_id):
         url = f'{self.api_url}{self.api_path}/groups/{group_id}/members'
 
-        print("group url ", url)
-
         response = requests.get(url, headers=self.headers)
-
-        print("group response ", response, response.json(), response.content)
 
         if response.status_code == 200:
             members = response.json()
@@ -149,11 +130,9 @@ class Gitlab_API:
 
         members = project_members + group_members
 
-        print("memebrs", members)
+        # is_member = any(member["id"] == userid for member in members)
 
-        is_member = any(member["id"] == userid for member in members)
-
-        if is_member:
+        if userid in members:
             return True
         else:
             return False
