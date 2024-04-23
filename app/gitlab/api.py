@@ -108,7 +108,7 @@ class Gitlab_API:
         return []
 
     def get_groups_with_access_to_project(self, project_id):
-        url = f'{self.api_url}{self.api_path}/projects/{project_id}/shared_groups'
+        url = f'{self.api_url}{self.api_path}/projects/{project_id}/groups'
 
         print("groups with access URL", url)
 
