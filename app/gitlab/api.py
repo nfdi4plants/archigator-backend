@@ -117,9 +117,14 @@ class Gitlab_API:
         return []
 
     def get_group_members(self, group_id):
-        url = f"{self.api_url}{self.api_path}/groups/{group_id}/members"
+        url = f'{self.api_url}{self.api_path}/groups/{group_id}/members'
+
+        print("group url ", url)
 
         response = requests.get(url, headers=self.headers)
+
+        print("group response ", response, response.json(), response.content)
+
         if response.status_code == 200:
             members = response.json()
             return [member['id'] for member in members]
