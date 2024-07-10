@@ -4,6 +4,36 @@ from app.gitlab.models.badges import *
 from app.helpers.hmac_generator import HmacGenerator
 
 
+
+def delete_project_badge(project_id: int):
+    gitlab_url = os.getenv("GITLAB_URL", "http://localhost")
+    archigator_url = os.getenv("ARCHIGATOR_URL", "http://localhost:8000")
+
+    preinstall_badges = ["publish-badge"]
+
+    print("in setup project", project_id)
+    gitlab_api = Gitlab_API()
+
+    project = gitlab_api.get_project(project_id)
+
+    # get project badges
+    badge_list = gitlab_api.list_badges(project_id)
+    print("list", badge_list.__root__)
+
+    available_badges = []
+
+    for badge in badge_list.__root__:
+        print(badge.name)
+        # badges.append((badge.name, badge.id))
+        if badge.name in preinstall_badges:
+            print("found available badge", badge.name)
+            available_badges.append(badge)
+            preinstall_badges.remove(badge.name)
+
+    for badge in available_badges:
+        gitlab_api.remove_badge(project_id, badge.id)
+
+
 def setup_project(project_id: int, overwrite: bool = False):
     gitlab_url = os.getenv("GITLAB_URL", "http://localhost")
     archigator_url = os.getenv("ARCHIGATOR_URL", "http://localhost:8000")

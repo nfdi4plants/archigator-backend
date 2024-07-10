@@ -4,7 +4,7 @@ from fastapi.encoders import jsonable_encoder
 
 from app.helpers.link_generator import LinkGenerator
 from app.tasks.setup.add_badge import setup_project
-from app.tasks.setup.setup_all_projects import setup_projects
+from app.tasks.setup.setup_all_projects import setup_projects, delete_badges
 from app.api.models.setup.project import Project, Projects
 from app.api.middlewares.http_basic_auth import *
 from app.tasks.setup.install_systemhook import *
@@ -24,6 +24,14 @@ async def install_project(request: Request, payload: Project, background_tasks: 
              description="Installs badges for all projects.")
 async def install_projects(request: Request, payload: Projects, background_tasks: BackgroundTasks):
     background_tasks.add_task(setup_projects, payload.overwrite)
+    return Response(status_code=status.HTTP_201_CREATED)
+
+
+@router.post("/delete_badges", summary="Setup", status_code=status.HTTP_201_CREATED,
+             response_class=Response, dependencies=[Depends(basic_auth)],
+             description="Removes badges in all projects.")
+async def install_projects(request: Request, payload: Projects, background_tasks: BackgroundTasks):
+    background_tasks.add_task(delete_badges)
     return Response(status_code=status.HTTP_201_CREATED)
 
 
