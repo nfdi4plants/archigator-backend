@@ -114,7 +114,7 @@ async def publish_project(request: Request, background_tasks: BackgroundTasks,
 
     try:
         metadata = gitlab_api.get_job_artifact(project_id=project.id, branch="main", filename="metadata.json",
-                                               job_name="create metadata")
+                                               job_name="generate_metadata")
     except:
         raise HTTPException(status_code=403, detail="No metadata available.")
 
