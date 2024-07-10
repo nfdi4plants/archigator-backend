@@ -110,7 +110,7 @@ async def status(authorization: str = Header(..., description="Bearer token", in
 
     try:
         metadata = gitlab_api.get_job_artifact(project_id=project.id, branch="main", filename="metadata.json",
-                                               job_name="generate_metadata")
+                                               job_name="Publication Metadata")
         print(metadata.title)
     except:
         print("no metadata available")

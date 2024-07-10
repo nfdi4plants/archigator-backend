@@ -221,7 +221,7 @@ async def metadata(publication: str = Header(..., description="Bearer token", in
 
     try:
         metadata = gitlab_api.get_job_artifact(project_id=project.id, branch="main", filename="metadata.json",
-                                               job_name="generate_metadata")
+                                               job_name="Publication Metadata")
         print("got metadata from", metadata)
         # print(metadata.title)
     except:
