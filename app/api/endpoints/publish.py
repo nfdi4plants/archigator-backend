@@ -151,21 +151,22 @@ async def publish_project(request: Request, background_tasks: BackgroundTasks,
 
     try:
         archive_file = gitlab_api.get_job_artifact_arcjson(project_id=project.id, branch="main", filename="arc.json",
-                                                           job_name="create ARC JSON")
-        summary_file = gitlab_api.get_job_artifact_md(project_id=project.id, branch="main",
-                                                      filename="arc-summary.md", job_name="create ARC JSON")
+                                                           job_name="Create ARC JSON")
+        # summary_file = gitlab_api.get_job_artifact_md(project_id=project.id, branch="main",
+        #                                               filename="arc-summary.md", job_name="create ARC JSON")
 
     except:
         raise HTTPException(status_code=403, detail="Couldn't retrieve arc.json")
 
     try:
-        invenio_api.start_draft_file_upload(record_id, ["arc.json", "arc-summary.md"])
+        # invenio_api.start_draft_file_upload(record_id, ["arc.json", "arc-summary.md"])
+        invenio_api.start_draft_file_upload(record_id, ["arc.json"])
         invenio_api.upload_draft_content(record_id, "arc.json", json.dumps(archive_file))
         invenio_api.complete_draft_upload(record_id=record_id, filename="arc.json")
 
         # invenio_api.start_draft_file_upload(record_id, ["arc-summary.md"])
-        invenio_api.upload_draft_content(record_id, "arc-summary.md", summary_file)
-        invenio_api.complete_draft_upload(record_id=record_id, filename="arc-summary.md")
+        # invenio_api.upload_draft_content(record_id, "arc-summary.md", summary_file)
+        # invenio_api.complete_draft_upload(record_id=record_id, filename="arc-summary.md")
 
         invenio_api.update_draft(record_id=record_id, record_model=record)
 

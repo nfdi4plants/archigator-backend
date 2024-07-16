@@ -543,7 +543,59 @@ class Gitlab_API:
         except requests.exceptions.RequestException as err:
             print(err)
 
-    def list_projects(self):
+
+    def get_all_projects(self):
+        projects = []
+
+        path = "/projects"
+
+        api_url = f'{self.api_url}{self.api_path}{path}'
+
+        page = 1
+        per_page = 20
+
+        while True:
+            response = requests.get(api_url, timeout=5, headers=self.headers,
+                                    params={'page': page, 'per_page': per_page})
+
+            if response.status_code != 200:
+                raise Exception(f"Failed to fetch projects: {response.status_code} {response.text}")
+
+            # Get JSON response
+            data = response.json()
+
+            print("data", data)
+
+            # If no more projects, break the loop
+            if not data:
+                break
+
+            # if page == 3:
+            #     break
+
+            # Add projects to the list
+            projects.extend(data)
+
+            page += 1
+
+
+        project_list = ProjectList(projects=projects)
+        return project_list.projects
+
+
+
+
+        # Fetch all projects
+        all_projects = get_all_projects()
+
+        # Print project names
+        for project in all_projects:
+            print(project['name'])
+
+
+
+
+    def list_projects_old(self):
         path = "/projects/"
 
         api_url = f'{self.api_url}{self.api_path}{path}'

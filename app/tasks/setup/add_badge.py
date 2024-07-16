@@ -9,7 +9,7 @@ def delete_project_badge(project_id: int):
     gitlab_url = os.getenv("GITLAB_URL", "http://localhost")
     archigator_url = os.getenv("ARCHIGATOR_URL", "http://localhost:8000")
 
-    preinstall_badges = ["publish-badge"]
+    preinstall_badges = ["publish-badge","auto-badge"]
 
     print("in setup project", project_id)
     gitlab_api = Gitlab_API()

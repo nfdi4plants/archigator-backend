@@ -36,19 +36,18 @@ def delete_badges():
     print("in deleting badges")
     gitlab_api = Gitlab_API()
 
-    projects_list = gitlab_api.list_projects()
+    print("getting obejects")
+    projects_list = gitlab_api.get_all_projects()
 
 
     projectid_list = []
 
     for projects in projects_list:
         projectid_list.append(projects.id)
-
-    print("project_idlist", projectid_list)
+        # print(projects.id)
 
 
     for project in projects_list:
-        print(project.id)
         delete_project_badge(project_id=project.id)
 
 
