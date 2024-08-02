@@ -153,7 +153,7 @@ async def publish_project(request: Request, background_tasks: BackgroundTasks,
         archive_file = gitlab_api.get_job_artifact_arcjson(project_id=project.id, branch="main", filename="arc.json",
                                                            job_name="Create ARC JSON")
         summary_file = gitlab_api.get_job_artifact_md(project_id=project.id, branch="main",
-                                                      filename="arc-summary.md", job_name="create ARC JSON")
+                                                      filename="arc-summary.md", job_name="Create ARC JSON")
 
     except:
         raise HTTPException(status_code=403, detail="Couldn't retrieve arc.json")
