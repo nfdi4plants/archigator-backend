@@ -19,6 +19,16 @@ router = APIRouter()
             responses={200: {"model": Receipt}, 500: {"model": Receipt}})
             # dependencies=[Depends(JWTBearer())])
 async def receipt(order_token: str):
+    """
+    :param order_token: The token for the order to retrieve the receipt information.
+    :return: The receipt information for the given order token.
+
+    This method retrieves the receipt information for a given order token. It decodes the token, retrieves the project and request details from external APIs, and creates a receipt object
+    * with the relevant information. The receipt object is then returned as a JSON response.
+
+    Example usage:
+        receipt("sample_token")
+    """
     try:
         print("publication", order_token)
         # scheme, token = publication.split(" ")

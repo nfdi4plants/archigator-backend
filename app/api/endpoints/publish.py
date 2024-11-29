@@ -47,6 +47,13 @@ security_scheme = HTTPBearer()
 
 
 def remove_email_identifiers(metadata: Metadata) -> Metadata:
+    """
+    :param metadata: The Metadata object containing the creators and their identifiers.
+    :type metadata: Metadata
+
+    :return: The updated Metadata object after removing all identifiers with scheme="email".
+    :rtype: Metadata
+    """
     if metadata.creators:
         for creator in metadata.creators:
             if creator.person_or_org.identifiers:
@@ -67,6 +74,15 @@ def remove_email_identifiers(metadata: Metadata) -> Metadata:
 async def publish_project(request: Request, background_tasks: BackgroundTasks,
                           publication: str = Header(..., description="Bearer token", include_in_schema=True),
                           access_token: AccessToken = Depends(validate_access_token)):
+    """
+    Publishes a project to the archive.
+
+    :param request: The request object.
+    :param background_tasks: The background tasks object.
+    :param publication: The Bearer token for authentication.
+    :param access_token: The access token for authentication.
+    :return: Returns a JSON response with the publication information.
+    """
     access_token = AccessToken(**access_token)
     try:
         scheme, token = publication.split(" ")
@@ -152,6 +168,11 @@ async def publish_project(request: Request, background_tasks: BackgroundTasks,
     try:
         archive_file = gitlab_api.get_job_artifact_arcjson(project_id=project.id, branch="main", filename="arc.json",
                                                            job_name="Create ARC JSON")
+
+        arc_ro_create_file = gitlab_api.get_job_artifact_arcjson(project_id=project.id, branch="main", filename="arc-ro-crate-metadata.json",
+                                                           job_name="Create ARC JSON")
+
+
         summary_file = gitlab_api.get_job_artifact_md(project_id=project.id, branch="main",
                                                       filename="arc-summary.md", job_name="Create ARC JSON")
 
@@ -163,6 +184,10 @@ async def publish_project(request: Request, background_tasks: BackgroundTasks,
         invenio_api.start_draft_file_upload(record_id, ["arc.json"])
         invenio_api.upload_draft_content(record_id, "arc.json", json.dumps(archive_file))
         invenio_api.complete_draft_upload(record_id=record_id, filename="arc.json")
+
+        invenio_api.start_draft_file_upload(record_id, ["arc-ro-crate-metadata.json"])
+        invenio_api.upload_draft_content(record_id, "arc-ro-crate-metadata.json", json.dumps(arc_ro_create_file))
+        invenio_api.complete_draft_upload(record_id=record_id, filename="arc-ro-crate-metadata.json")
 
         invenio_api.start_draft_file_upload(record_id, ["arc-summary.md"])
         invenio_api.upload_draft_content(record_id, "arc-summary.md", summary_file)
