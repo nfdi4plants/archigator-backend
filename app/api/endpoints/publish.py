@@ -98,7 +98,7 @@ async def publish_project(request: Request, background_tasks: BackgroundTasks,
     try:
         project = gitlab_api.get_project(jwt_token.project_id)
     except:
-        raise HTTPException(status_code=403, detail="Could not retrieve project details.")
+        raise HTTPException(status_code=422, detail="Could not retrieve project details.")
 
     # try:
     #     user = gitlab_api.get_user(project.owner.id)
@@ -109,12 +109,12 @@ async def publish_project(request: Request, background_tasks: BackgroundTasks,
         # user = gitlab_api.get_user(project.owner.id)
         user = gitlab_api.get_userid_by_mail(access_token.preferred_username)
     except:
-        raise HTTPException(status_code=403, detail="User information could not be retrieved.")
+        raise HTTPException(status_code=422, detail="User information could not be retrieved.")
 
     try:
         is_member = gitlab_api.userid_is_member(user.id, project.id)
     except:
-        raise HTTPException(status_code=403, detail="Could not retrieve membership")
+        raise HTTPException(status_code=422, detail="Could not retrieve membership")
 
     if not is_member:
         raise HTTPException(status_code=403, detail="You must be member of this project to publish.")
@@ -122,17 +122,17 @@ async def publish_project(request: Request, background_tasks: BackgroundTasks,
     try:
         pipeline = gitlab_api.get_latest_pipeline(project.id)
     except:
-        raise HTTPException(status_code=403, detail="Pipeline details could not be retrieved.")
+        raise HTTPException(status_code=422, detail="Pipeline details could not be retrieved.")
 
     if pipeline.status != "success":
         print("pipeline not succeded, cancel request")
-        raise HTTPException(status_code=403, detail="The project must pass all tests before it can be published.")
+        raise HTTPException(status_code=422, detail="The project must pass all tests before it can be published.")
 
     try:
         metadata = gitlab_api.get_job_artifact(project_id=project.id, branch="main", filename="metadata.json",
                                                job_name="Publication Metadata")
     except:
-        raise HTTPException(status_code=403, detail="No metadata available.")
+        raise HTTPException(status_code=422, detail="No metadata available.")
 
     metadata_model = Metadata(**metadata)
 
@@ -154,7 +154,7 @@ async def publish_project(request: Request, background_tasks: BackgroundTasks,
 
     record = Record(access=Access(record="public", files="public"), files=Files(enabled=True,
                                                                                 default_preview="arc-summary.md",
-                                                                                order=["arc-summary.md", "arc.json"]),
+                                                                                order=["arc-summary.md", "arc-ro-crate-metadata.json", "arc.json"]),
                     metadata=metadata_model)
 
     try:
@@ -196,13 +196,13 @@ async def publish_project(request: Request, background_tasks: BackgroundTasks,
         invenio_api.update_draft(record_id=record_id, record_model=record)
 
     except:
-        raise HTTPException(status_code=403, detail="Could not upload arc.json as draft upload.")
+        raise HTTPException(status_code=422, detail="Could not upload arc.json as draft upload.")
 
     try:
         blu = invenio_api.create_draft_review(record_id)
         print(blu)
     except:
-        raise HTTPException(status_code=403, detail="Couldn't create draft review.")
+        raise HTTPException(status_code=422, detail="Couldn't create draft review.")
 
     # add archive to draft
 
@@ -213,7 +213,7 @@ async def publish_project(request: Request, background_tasks: BackgroundTasks,
         draft = invenio_api.submit_draft_review(record_id=record_id, user_model=user)
     except:
         print("could not submit draft")
-        raise HTTPException(status_code=403, detail="Couldn't submit draft review.")
+        raise HTTPException(status_code=422, detail="Couldn't submit draft review.")
 
     # try:
     #     metadata = gitlab_api.get_job_artifact(project_id=project.id, branch="main", filename="metadata.json",
@@ -280,12 +280,17 @@ async def publish_project(request: Request, background_tasks: BackgroundTasks,
     submission_url = "https://archive.nfdi4plants.org/communities/dataplant/requests"
     submission_url = hmac_generator.build_url(submission_url, review.id)
 
-    curator_mail = [mail for mail in [os.environ.get("CURATOR_MAIL", None)] if mail is not None]
+    # curator_mail = [mail for mail in [os.environ.get("CURATOR_MAIL", None)] if mail is not None]
+
+    curator_mail = os.environ.get("CURATOR_MAIL", None)
+
     print("sending to:", curator_mail)
 
     if mail_enabled:
         background_tasks.add_task(send_mail, user_mails, user.name, project.name, order_url)
 
         if curator_mail:
+            curator_mail = curator_mail.split(',')
+
             background_tasks.add_task(send_curator_mail, curator_mail, user.name, project.name, submission_url)
     return JSONResponse(status_code=201, content=response_json)

@@ -119,7 +119,8 @@ class Mailer:
         self.username = username
         self.password = password
         self.sender = sender
-        self.receiver = receiver
+        # self.receiver = receiver
+        self.receiver = receiver if isinstance(receiver, list) else [receiver]
 
         self.root_message = MIMEMultipart('related')
 
