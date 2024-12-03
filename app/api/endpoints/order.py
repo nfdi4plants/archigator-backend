@@ -72,11 +72,6 @@ async def receipt(order_token: str):
     except:
         comments = []
 
-    print(project.name)
-    print(project.web_url)
-    print(project.owner.name)
-    print(review.status)
-
     try:
         receipt = Receipt(status=review.status, web_url=project.web_url, investigation_name=review.title, comments=comments, order_id=review.id)
     except:
