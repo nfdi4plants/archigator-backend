@@ -154,7 +154,7 @@ async def publish_project(request: Request, background_tasks: BackgroundTasks,
 
     record = Record(access=Access(record="public", files="public"), files=Files(enabled=True,
                                                                                 default_preview="arc-summary.md",
-                                                                                order=["arc-summary.md", "arc-ro-crate-metadata.json", "arc.json"]),
+                                                                                order=["arc-summary.md", "arc-ro-crate-metadata.json", "arc-isa.json"]),
                     metadata=metadata_model)
 
     try:
@@ -166,7 +166,7 @@ async def publish_project(request: Request, background_tasks: BackgroundTasks,
     # record_id = draft_record.id
 
     try:
-        archive_file = gitlab_api.get_job_artifact_arcjson(project_id=project.id, branch="main", filename="arc.json",
+        archive_file = gitlab_api.get_job_artifact_arcjson(project_id=project.id, branch="main", filename="arc-isa.json",
                                                            job_name="Create ARC JSON")
 
         arc_ro_create_file = gitlab_api.get_job_artifact_arcjson(project_id=project.id, branch="main", filename="arc-ro-crate-metadata.json",
@@ -181,9 +181,9 @@ async def publish_project(request: Request, background_tasks: BackgroundTasks,
 
     try:
         # invenio_api.start_draft_file_upload(record_id, ["arc.json", "arc-summary.md"])
-        invenio_api.start_draft_file_upload(record_id, ["arc.json"])
-        invenio_api.upload_draft_content(record_id, "arc.json", json.dumps(archive_file))
-        invenio_api.complete_draft_upload(record_id=record_id, filename="arc.json")
+        invenio_api.start_draft_file_upload(record_id, ["arc-isa.json"])
+        invenio_api.upload_draft_content(record_id, "arc-isa.json", json.dumps(archive_file))
+        invenio_api.complete_draft_upload(record_id=record_id, filename="arc-isa.json")
 
         invenio_api.start_draft_file_upload(record_id, ["arc-ro-crate-metadata.json"])
         invenio_api.upload_draft_content(record_id, "arc-ro-crate-metadata.json", json.dumps(arc_ro_create_file))
