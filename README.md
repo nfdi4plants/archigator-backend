@@ -1,3 +1,6 @@
+> [!WARNING]
+> This repo is not actively maintained, see [nfdi4plants/archigator2.0](https://github.com/nfdi4plants/archigator2.0) for its replacement
+
 # archigator
 Archigator offers users a simple way to publish ARCs from gitlab to an Invenio repository
 
